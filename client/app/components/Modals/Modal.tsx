@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from "react";
-import { IoMdClose } from "react-icons/io"
+import { IoMdClose, IoMdAddCircle } from "react-icons/io"
 import Button from "../Button";
 
 interface ModalProps {
@@ -11,10 +11,10 @@ interface ModalProps {
     title?: string;
     body?: React.ReactElement;
     footer?: React.ReactElement;
-    actionLabel?: string;
+    actionLabel: string;
     disabled?: boolean;
     secondaryAction?: () => void;
-    secondaryLabel?: string;
+    secondaryActionLabel?: string;
 }
 
 const Modal : React.FC<ModalProps> = ({
@@ -27,7 +27,7 @@ const Modal : React.FC<ModalProps> = ({
     actionLabel,
     disabled,
     secondaryAction,
-    secondaryLabel
+    secondaryActionLabel
 }) => {
 
     const [showModal, setShowModal] = useState(isOpen);
@@ -151,8 +151,21 @@ const Modal : React.FC<ModalProps> = ({
                             {/* Footer */}
                             <div className="flex flex-col gap-2 p-6">
                                 <div className="flex flex-row items-center gap-4 w-full">
-                                    <Button onClick={()=>{}} small label={"test"}/>
+
+                                    {secondaryAction && secondaryActionLabel && (
+                                        <Button 
+                                            disabled={disabled}
+                                            label={secondaryActionLabel}
+                                            onClick={secondaryAction}
+                                        />
+                                    )}
+                                        <Button 
+                                            disabled={disabled}
+                                            label={actionLabel}
+                                            onClick={handleSubmit}
+                                        />
                                 </div>
+                                {footer}
                             </div>
                         </div>
 
