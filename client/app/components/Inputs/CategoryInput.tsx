@@ -1,3 +1,6 @@
+'use client';
+
+import client from "@/app/libs/prismadb";
 import { IconType } from "react-icons";
 
 interface CategoryInputProps {
