@@ -6,12 +6,15 @@ import { useMemo, useState } from "react";
 import Heading from "./Heading";
 import { categories } from "../Navbar/Categories";
 import CategoryInput from "../Inputs/CategoryInput";
-import { FieldValues, useForm } from "react-hook-form";
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import CountrySelect from "../Inputs/CountrySelect";
 import dynamic from "next/dynamic";
 import Counter from "../Inputs/Counter";
 import ImageUpload from "../Inputs/ImageUpload";
 import Input from "../Inputs/Input";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 enum STEPS {
     CATEGORY = 0, 
@@ -24,6 +27,7 @@ enum STEPS {
 
 const RentModal = () => {
     const rentModal = useRentModal();
+    const router = useRouter();
 
     const [step, setStep] = useState(STEPS.CATEGORY)
     const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +79,29 @@ const RentModal = () => {
 
     const onNext = () => {
         setStep((value) => value+1)
+    }
+
+    const onSubmit: SubmitHandler<FieldValues> = (data ) => {
+        if(step !== STEPS.PRICE) {
+            return onNext();  
+        }
+
+        setIsLoading(true);
+
+        axios.post('/api/listings/', data)
+                    .then(() => {
+                        toast.success("Listing Created!");
+                        router.refresh();
+                        reset();
+                        setStep(STEPS.CATEGORY)
+                    })
+                    .catch(() => {
+                        toast.error("Something went wrong...")
+                    })
+                    .finally(() => {
+                        setIsLoading(false);
+                        rentModal.onClose();
+                    })
     }
 
     const actionLabel = useMemo(()=> {
@@ -215,8 +242,18 @@ const RentModal = () => {
         bodyContent = (
             <div className="flex flex-col gap-8">
                 <Heading 
-                    title="Set the price"
-                    subtitle="How much will you charge?"
+                    title="Now, set your price"
+                    subtitle="How much do you charge per night?"
+                />
+                <Input 
+                    formatPrice
+                    id="price"
+                    label="Price"
+                    register={register}
+                    errors={errors}
+                    required
+                    disabled={isLoading}
+                    type="number"
                 />
             </div>
         )
@@ -226,7 +263,7 @@ const RentModal = () => {
         <Modal 
             isOpen={rentModal.isOpen}
             onClose={rentModal.onClose}
-            onSubmit={onNext}
+            onSubmit={handleSubmit(onSubmit)}
             actionLabel={actionLabel}
             secondaryActionLabel={secondaryActionLabel}
             secondaryAction={step === STEPS.CATEGORY ? undefined :  onBack}
